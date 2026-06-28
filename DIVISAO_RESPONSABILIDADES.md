@@ -25,7 +25,7 @@ O objetivo comum e entregar um dashboard em Streamlit que consolide o pipeline c
 
 | Integrante | Frente principal | Entregas individuais | Peso aproximado |
 |---|---|---|---|
-| Parte 1 | Analise estatistica e validacao das hipoteses | Notebook/script de analise final, testes estatisticos, intervalos de confianca, tamanhos de efeito e interpretacao tecnica | 25% |
+| Parte 1 | Analise estatistica e validacao das hipoteses | Script de analise final, testes estatisticos, intervalos de confianca, tamanhos de efeito e interpretacao tecnica | 25% |
 | Parte 2 | Dashboard Streamlit e experiencia interativa | Estrutura da aplicacao, paginas/secoes, filtros, indicadores visuais, graficos interativos e textos curtos no dashboard | 25% |
 | Parte 3 | Dados, indicadores e rastreabilidade do pipeline | Organizacao das camadas de dados, validacao da camada gold, calculo/documentacao dos indicadores e conferencia dos resultados com a AED | 25% |
 | Parte 4 | Reprodutibilidade, Docker e documentacao final | `Dockerfile`, `compose.yaml`, `requirements.txt`, README final, instrucoes de execucao, encerramento e submissao/tag | 25% |
@@ -54,7 +54,7 @@ Tarefas:
 
 Entregas esperadas:
 
-- `notebooks/analise.ipynb` ou script equivalente com a etapa de analise.
+- `analysis/analise_estatistica.py` com a etapa de analise.
 - Tabela-resumo das analises finais para alimentar o dashboard e o README.
 - Texto curto com conclusoes tecnicas e cuidados de interpretacao.
 
@@ -150,7 +150,7 @@ Entregas esperadas:
 
 Revisao cruzada:
 
-- Revisar o notebook/script de analise para confirmar que os dados e variaveis usados estao corretos.
+- Revisar o script de analise para confirmar que os dados e variaveis usados estao corretos.
 
 ## Parte 4 - Reprodutibilidade, Docker e documentacao final
 
@@ -225,7 +225,6 @@ Estas tarefas devem ser feitas em conjunto ou revisadas por todos:
 - Testar a aplicacao antes da entrega final.
 - Garantir que nenhum caminho absoluto do computador de um integrante seja necessario.
 - Conferir se a tag `entrega-final` foi criada somente depois da validacao final.
-
 
 
 
