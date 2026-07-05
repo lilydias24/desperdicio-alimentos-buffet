@@ -1,93 +1,115 @@
 # Grupo 03
 
+Projeto: Investigacao do Desperdicio de Alimentos em Servicos de Buffet.
 
+Integrantes: Arthur Provenzi Parizotto, Bianca Maia Ribeiro, Emilly Nascimento
+Dias e Rafael Jacques do Nascimento Lopes.
 
-## Getting started
+## Status do projeto
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+Em andamento no momento: **Parte 1** (analise estatistica) e **Parte 2**
+(dashboard Streamlit). As Partes 3 (organizacao completa das camadas de dados
+bronze/silver/gold e validacao) e 4 (Dockerfile, compose.yaml e documentacao
+final de reprodutibilidade) ainda nao foram iniciadas. Ver
+`DIVISAO_RESPONSABILIDADES.md` para o detalhamento de cada parte.
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+A base `data/gold/food_wastage_gold.csv` incluida no repositorio e um
+adiantamento necessario para permitir a execucao local da analise e do
+dashboard; a organizacao definitiva das camadas de dados (bronze/silver/gold)
+e a validacao completa dela sao responsabilidade da Parte 3.
 
-## Add your files
+## Analise estatistica (Parte 1)
 
-* [Create](https://docs.gitlab.com/user/project/repository/web_editor/#create-a-file) or [upload](https://docs.gitlab.com/user/project/repository/web_editor/#upload-a-file) files
-* [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
+Script que valida as hipoteses exploratorias (HE-01 a HE-06) com testes
+estatisticos formais: teste t de Welch, Kruskal-Wallis, bootstrap de
+intervalo de confianca e correlacao de Pearson/Spearman.
 
 ```
-cd existing_repo
-git remote add origin https://gitlab.unipampa.edu.br/ales/icd-2026.1/grupo-03.git
-git branch -M main
-git push -uf origin main
+analysis/
+  analise_estatistica.py   # python analysis/analise_estatistica.py
 ```
 
-## Integrate with your tools
+### Como executar
 
-* [Set up project integrations](https://gitlab.unipampa.edu.br/ales/icd-2026.1/grupo-03/-/settings/integrations)
+```bash
+pip install -r requirements.txt
+python analysis/analise_estatistica.py
+```
 
-## Collaborate with your team
+Por padrao le `data/gold/food_wastage_gold.csv` e gera em
+`outputs/analise/`:
 
-* [Invite team members and collaborators](https://docs.gitlab.com/user/project/members/)
-* [Create a new merge request](https://docs.gitlab.com/user/project/merge_requests/creating_merge_requests/)
-* [Automatically close issues from merge requests](https://docs.gitlab.com/user/project/issues/managing_issues/#closing-issues-automatically)
-* [Enable merge request approvals](https://docs.gitlab.com/user/project/merge_requests/approvals/)
-* [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+- `resumo_analises.csv` - estimativa, IC 95%, p-valor e tamanho de efeito por analise.
+- `estatisticas_grupos.csv` - estatisticas descritivas por grupo.
+- `perfis_risco.csv` - ranking de perfis operacionais por taxa media de desperdicio.
+- `relatorio_analise.md` - relatorio consolidado em markdown.
 
-## Test and Deploy
+## Dashboard Streamlit (Parte 2)
 
-Use the built-in continuous integration in GitLab.
+Aplicacao interativa que consolida o pipeline do projeto (contexto, dados,
+indicadores, analises por pergunta e conclusoes) em `http://localhost:8501`.
 
-* [Get started with GitLab CI/CD](https://docs.gitlab.com/ci/quick_start/)
-* [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/user/application_security/sast/)
-* [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/topics/autodevops/requirements/)
-* [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/user/clusters/agent/)
-* [Set up protected environments](https://docs.gitlab.com/ci/environments/protected_environments/)
+### Estrutura
 
-***
+```
+app/
+  app.py                     # ponto de entrada (streamlit run app/app.py)
+  components/
+    filters.py               # filtros da barra lateral
+    indicators.py            # calculo e exibicao dos indicadores (KPIs)
+    charts.py                 # construtores de graficos Plotly (box/violin,
+                               # barras, heatmap, ranking, scatter)
+  services/
+    data.py                   # carregamento da camada gold, filtragem e
+                               # ranking de perfis de risco
+  utils/
+    formatting.py             # formatacao de percentuais e numeros
+data/
+  gold/food_wastage_gold.csv  # base gold usada pelo dashboard e pela analise
+```
 
-# Editing this README
+### Como executar localmente
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+```bash
+pip install -r requirements.txt
+streamlit run app/app.py
+```
 
-## Suggestions for a good README
+Acesse `http://localhost:8501`. Para encerrar, use `Ctrl+C` no terminal.
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+### Navegacao
 
-## Name
-Choose a self-explaining name for your project.
+- **Contexto e problema** - problema do desperdicio, perguntas Q1-Q4 e
+  amostra da base gold.
+- **Indicadores gerais** - taxa media de desperdicio, desperdicio medio por
+  evento, desperdicio por convidado, quantidade media produzida, perfil de
+  maior risco e maior diferenca entre grupos, para a selecao atual de filtros.
+- **Analises por pergunta** - uma aba por pergunta (Q1 a Q4), cada uma com o
+  grafico mais adequado (boxplot/violin, barras, heatmap, scatter ou ranking)
+  e um texto curto de interpretacao.
+- **Perfis de risco** - ranking completo dos perfis operacionais
+  (`event_size | preparation_method | pricing`) por taxa media de
+  desperdicio, com tabela detalhada.
+- **Conclusoes e limitacoes** - situacao de cada hipotese avaliada
+  (confirmada, rejeitada ou parcialmente confirmada) e cuidados de
+  interpretacao (dados observacionais, perfis com poucos eventos, etc.).
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+### Controles (filtros)
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+Na barra lateral, valem para todas as paginas exceto "Contexto e problema":
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+- Metodo de preparo (`preparation_method`)
+- Faixa de preco / pricing (`pricing`)
+- Tipo de evento (`event_type`)
+- Tipo de alimento (`type_of_food`)
+- Porte do evento (`event_size`)
+- Condicao de armazenamento (`storage_conditions`)
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+Todos os filtros iniciam com todas as opcoes selecionadas (nenhum filtro
+vazio na abertura). O botao "Limpar filtros" restaura essa selecao completa.
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+## Repositorio
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
-
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+```bash
+git clone https://gitlab.unipampa.edu.br/ales/icd-2026.1/grupo-03.git
+```
