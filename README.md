@@ -8,15 +8,16 @@ Dias e Rafael Jacques do Nascimento Lopes.
 ## Status do projeto
 
 Em andamento no momento: **Parte 1** (analise estatistica) e **Parte 2**
-(dashboard Streamlit). As Partes 3 (organizacao completa das camadas de dados
-bronze/silver/gold e validacao) e 4 (Dockerfile, compose.yaml e documentacao
-final de reprodutibilidade) ainda nao foram iniciadas. Ver
-`DIVISAO_RESPONSABILIDADES.md` para o detalhamento de cada parte.
+(dashboard Streamlit). A **Parte 3** (organizacao das camadas de dados
+bronze/silver/gold, validacao da camada gold e documentacao dos indicadores)
+ja foi realizada. A Parte 4 (Dockerfile, compose.yaml e documentacao final de
+reprodutibilidade) ainda nao foi iniciada. Ver `DIVISAO_RESPONSABILIDADES.md`
+para o detalhamento de cada parte.
 
-A base `data/gold/food_wastage_gold.csv` incluida no repositorio e um
-adiantamento necessario para permitir a execucao local da analise e do
-dashboard; a organizacao definitiva das camadas de dados (bronze/silver/gold)
-e a validacao completa dela sao responsabilidade da Parte 3.
+A base `data/gold/food_wastage_gold.csv` incluida no repositorio permite a
+execucao local da analise e do dashboard sem etapa de download. A estrutura
+de camadas (bronze/silver/gold) e a validacao da camada gold estao descritas
+na secao *Dados e indicadores (Parte 3)*.
 
 ## Analise estatistica (Parte 1)
 
@@ -43,6 +44,46 @@ Por padrao le `data/gold/food_wastage_gold.csv` e gera em
 - `estatisticas_grupos.csv` - estatisticas descritivas por grupo.
 - `perfis_risco.csv` - ranking de perfis operacionais por taxa media de desperdicio.
 - `relatorio_analise.md` - relatorio consolidado em markdown.
+
+## Dados e indicadores (Parte 3)
+
+Organizacao das camadas de dados e validacao da camada gold que sustenta o
+dashboard e a analise.
+
+### Estrutura das camadas
+
+```
+data/
+  bronze/   # dados crus, como recebidos da fonte (ver data/bronze/README.md)
+  silver/   # dados limpos e padronizados (ver data/silver/README.md)
+  gold/
+    food_wastage_gold.csv   # base final com indicadores, usada pelo app e pela analise
+```
+
+Todos os caminhos de dados sao relativos (resolvidos a partir da raiz do
+repositorio), compativeis com execucao local e via Docker.
+
+### Validacao da camada gold
+
+```bash
+python analysis/validacao_camada_gold.py
+```
+
+Confere colunas obrigatorias, valores ausentes, duplicatas, consistencia
+logica e as formulas dos indicadores. Termina com codigo `0` se a camada gold
+estiver valida. O resultado detalhado esta em
+`docs/checklist_validacao_gold.md`.
+
+### Dicionario de indicadores
+
+As definicoes e formulas dos indicadores (`wastage_rate`,
+`wastage_per_guest`, `event_profile`, `waste_risk_rank`, entre outros) estao
+em `docs/dicionario_indicadores.md`. Principais formulas:
+
+- `wastage_rate = wastage_food_amount / quantity_of_food * 100`
+- `wastage_per_guest = wastage_food_amount / number_of_guests`
+- `waste_risk_rank`: ranking do `event_profile` pela taxa media de
+  desperdicio, em ordem decrescente (1 = maior risco).
 
 ## Dashboard Streamlit (Parte 2)
 
