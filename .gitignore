@@ -12,6 +12,9 @@ __pycache__/
 venv/
 env/
 
+# Saidas geradas pelos scripts de analise (recriaveis)
+outputs/
+
 # Streamlit
 .streamlit/secrets.toml
 
