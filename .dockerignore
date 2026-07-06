@@ -1,0 +1,23 @@
+# Controle de versao
+.git/
+.gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Saidas geradas localmente (recriaveis pelos scripts)
+outputs/
+
+# IDEs, editores e ferramentas locais
+.vscode/
+.idea/
+.claude/
+.DS_Store
+Thumbs.db
