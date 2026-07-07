@@ -199,6 +199,8 @@ opcoes selecionadas e o botao "Limpar filtros" restaura a selecao completa.
 ├── Dockerfile                    # imagem do dashboard (Parte 4)
 ├── compose.yaml                  # orquestracao com Docker Compose (Parte 4)
 ├── requirements.txt              # dependencias Python
+├── apresentar.ps1 / apresentar.sh  # sobe o dashboard com um comando (demo/apresentacao)
+├── parar.ps1 / parar.sh            # encerra o dashboard
 ├── README.md
 └── DIVISAO_RESPONSABILIDADES.md
 ```
@@ -207,6 +209,24 @@ Todos os caminhos de dados sao relativos (resolvidos a partir da raiz do
 repositorio), compativeis com execucao local e via Docker.
 
 ## Instrucoes de execucao
+
+### Script rapido (recomendado para demo/apresentacao)
+
+Na raiz do repositorio, execute:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File apresentar.ps1   # Windows
+```
+
+```bash
+./apresentar.sh                                            # Linux/Mac/Git Bash
+```
+
+O script detecta Docker automaticamente e roda `docker compose up --build
+-d`; se o Docker nao estiver disponivel na maquina, cai para execucao
+local com Python. Em ambos os casos, espera o dashboard responder e abre
+o navegador em `http://localhost:8501` sozinho. Para encerrar, use
+`parar.ps1` (Windows) ou `./parar.sh` (Linux/Mac/Git Bash).
 
 ### Com Docker (recomendado)
 
