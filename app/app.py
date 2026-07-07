@@ -52,6 +52,35 @@ def page_contexto(df) -> None:
         """
     )
 
+    st.subheader("Publico-alvo")
+    st.markdown(
+        """
+        Equipes de planejamento e operacao de servicos de buffet
+        (gestores de producao, compras e eventos) que precisam decidir
+        quanto alimento preparar e identificar combinacoes operacionais
+        (metodo de preparo, armazenamento, pricing, porte do evento) com
+        maior risco de desperdicio.
+        """
+    )
+
+    st.subheader("Fonte, escopo e unidade de analise")
+    st.markdown(
+        """
+        - **Fonte:** dataset *Food Wastage Data in Restaurant*, publicado
+          no [Kaggle](https://www.kaggle.com/datasets/trevinhannibal/food-wastage-data-in-restaurant).
+        - **Unidade de analise:** cada linha representa **um
+          registro/evento de desperdicio de alimentos** (um preparo/servico
+          associado a um evento) - a base gold nao e agregada por categoria.
+        - **Escopo e recorte:** dataset sintetico/educacional, sem data de
+          coleta, identificador unico de evento ou recorte geografico real
+          documentados pela fonte; os valores de `quantity_of_food` e
+          `wastage_food_amount` sao tratados em uma unidade assumida (ver
+          `docs/dicionario_indicadores.md`). Os resultados ilustram o
+          metodo de analise e nao devem ser generalizados para operacoes
+          reais sem validacao adicional.
+        """
+    )
+
     st.subheader("Perguntas analiticas do projeto")
     st.markdown(
         """
@@ -156,17 +185,22 @@ def page_perguntas(df_filtered) -> None:
         st.markdown(
             "**Leitura:** o violin plot mostra como a taxa de desperdicio se "
             "distribui dentro de cada tipo de alimento (forma mais larga = "
-            "mais eventos naquela faixa de valor). O heatmap evidencia se o "
-            "efeito da condicao de armazenamento muda conforme o alimento, "
-            "em vez de ser constante entre categorias."
+            "mais eventos naquela faixa de valor). O heatmap evidencia se a "
+            "diferenca associada a condicao de armazenamento muda conforme "
+            "o alimento, em vez de ser constante entre categorias - sem "
+            "testes formais de significancia nesta pagina, essas sao "
+            "comparacoes descritivas."
         )
         st.caption(
             "Achado da AED (base completa): Sit-down Dinner tem taxa media de "
             "7,51% contra 6,06% de Finger Food. O armazenamento nao muda a "
-            "media geral (Refrigerado 6,88% vs. Temp. ambiente 6,86%), mas "
-            "muda por alimento: Baked Goods e Dairy Products desperdicam "
-            "cerca de 1,3 a 1,6 p.p. a mais em temperatura ambiente, enquanto "
-            "Carnes e Vegetais nao mostram esse padrao."
+            "media geral (Refrigerado 6,88% vs. Temp. ambiente 6,86%). Na "
+            "AED descritiva, Baked Goods e Dairy Products desperdicam cerca "
+            "de 1,3 a 1,6 p.p. a mais em temperatura ambiente - mas o teste "
+            "de Welch formal por alimento (Parte 1) nao confirma essa "
+            "diferenca como estatisticamente significativa (p = 0,076 e "
+            "p = 0,058, respectivamente); tratar como padrao sugestivo, "
+            "nao como achado confirmado."
         )
 
     with tab_q2:
@@ -231,9 +265,11 @@ def page_perguntas(df_filtered) -> None:
         st.markdown(
             f"**Leitura:** a correlacao linear entre quantidade produzida e "
             f"taxa de desperdicio na selecao atual e **r = {corr:.3f}**. O "
-            "heatmap mostra se pricing e metodo de preparo interagem, ou "
-            "seja, se o efeito de um depende do nivel do outro, o que uma "
-            "media isolada por variavel nao revelaria."
+            "heatmap mostra a taxa media observada em cada combinacao de "
+            "pricing e metodo de preparo; combinacoes com taxa bem acima "
+            "ou abaixo do esperado pelas medias isoladas de cada variavel "
+            "indicam um perfil de risco especifico, sem que isso demonstre "
+            "uma forma de interacao estatistica formal entre os fatores."
         )
         st.caption(
             "Achado da AED (base completa): pricing High tem taxa media de "
@@ -312,9 +348,12 @@ def page_conclusoes() -> None:
 
     st.subheader("Hipoteses avaliadas (base completa)")
     st.caption(
-        "Situacao de cada hipotese avaliada na etapa de analise estatistica "
-        "final (ver `analysis/analise_estatistica.py` para os testes formais: "
-        "Welch, Kruskal-Wallis, bootstrap e correlacao)."
+        "Cada hipotese e classificada como **Confirmada**, **Rejeitada** ou "
+        "**Nao avaliavel** (dados insuficientes), conforme a etapa de "
+        "analise estatistica final (ver `analysis/analise_estatistica.py` "
+        "para os testes formais: Welch, Kruskal-Wallis, bootstrap e "
+        "correlacao). Nenhuma das seis ficou como nao avaliavel: a base "
+        "gold permitiu avaliar todas."
     )
     hipoteses = [
         {
@@ -322,36 +361,42 @@ def page_conclusoes() -> None:
             "Descricao": "Sit-down Dinner tem maior taxa de desperdicio que os demais metodos de preparo.",
             "Achado": "7,51% vs. 6,06% (Finger Food) e 7,02% (Buffet).",
             "Situacao": "Confirmada",
+            "Ressalva": "-",
         },
         {
             "Hipotese": "HE-02 (Q1)",
-            "Descricao": "O efeito do armazenamento depende do tipo de alimento.",
-            "Achado": "Sem diferenca na media geral (6,88% vs. 6,86%), mas Baked Goods/Dairy pioram ~1,3-1,6 p.p. em temp. ambiente.",
-            "Situacao": "Confirmada (efeito condicional, nao geral)",
+            "Descricao": "A diferenca de desperdicio associada ao armazenamento depende do tipo de alimento.",
+            "Achado": "Sem diferenca na media geral (6,88% vs. 6,86%). Na AED (descritiva), Baked Goods/Dairy pioram ~1,3-1,6 p.p. em temp. ambiente, mas o teste de Welch formal por alimento nao confirma significancia (p = 0,076 em Baked Goods; p = 0,058 em Dairy Products; demais alimentos tambem nao significativos).",
+            "Situacao": "Rejeitada",
+            "Ressalva": "Padrao descritivo sugestivo (mesma direcao em 2 de 5 alimentos), mas nao sustentado pelo teste formal ao nivel de 5%; tratar como hipotese em aberto, nao como achado confirmado.",
         },
         {
             "Hipotese": "HE-03 (Q3)",
             "Descricao": "Pricing High esta associado a maior taxa de desperdicio.",
             "Achado": "8,81% (High) vs. 5,46% (Low) e 5,84% (Moderate).",
             "Situacao": "Confirmada",
+            "Ressalva": "-",
         },
         {
             "Hipotese": "HE-04 (Q3)",
             "Descricao": "Maior quantidade produzida se associa a maior taxa de desperdicio.",
             "Achado": "7,54% (Alta) vs. 6,28% (Baixa); correlacao r = 0,25 (fraca a moderada).",
-            "Situacao": "Parcialmente confirmada",
+            "Situacao": "Confirmada",
+            "Ressalva": "Associacao fraca a moderada; quantidade isolada nao e bom preditor.",
         },
         {
             "Hipotese": "HE-05 (Q4)",
             "Descricao": "Existem perfis operacionais que concentram maior risco de desperdicio.",
-            "Achado": "'Pequeno | Sit-down Dinner | High' lidera com ~11,1% (18 eventos); High + Sit-down Dinner e o pior par em todo porte.",
-            "Situacao": "Confirmada (com ressalva de amostra pequena no perfil-lider)",
+            "Achado": "'Pequeno | Sit-down Dinner | High' lidera com ~11,1% (18 eventos); High + Sit-down Dinner e o perfil de maior taxa observada em todo porte.",
+            "Situacao": "Confirmada",
+            "Ressalva": "Perfil-lider tem amostra pequena (18 eventos); ler com cautela.",
         },
         {
             "Hipotese": "HE-06 (Q2)",
             "Descricao": "O porte do evento, isolado, e bom preditor do desperdicio por convidado.",
             "Achado": "Desperdicio por convidado quase constante entre portes (0,088 a 0,092).",
             "Situacao": "Rejeitada",
+            "Ressalva": "-",
         },
     ]
     st.table(pd.DataFrame(hipoteses).set_index("Hipotese"))
@@ -363,10 +408,13 @@ def page_conclusoes() -> None:
           diferencas consistentes na taxa media de desperdicio: Sit-down
           Dinner desperdica mais que Buffet e Finger Food, em todas as
           faixas de pricing.
-        - O efeito da condicao de armazenamento (`storage_conditions`)
-          nao e uniforme entre tipos de alimento: o heatmap da pagina *Q1*
-          mostra que Baked Goods e Dairy Products sao mais sensiveis ao
-          armazenamento em temperatura ambiente do que Carnes e Vegetais.
+        - Na exploracao descritiva, a diferenca de desperdicio associada a
+          condicao de armazenamento (`storage_conditions`) parece nao ser
+          uniforme entre tipos de alimento (Baked Goods e Dairy Products
+          com taxas mais altas em temperatura ambiente), mas o teste
+          formal por alimento nao confirma essa diferenca como
+          estatisticamente significativa (HE-02, ver tabela de hipoteses
+          acima) - tratar como hipotese em aberto para investigacao futura.
         - A faixa de preco (`pricing`) e a variavel isolada com maior poder
           de discriminacao encontrada na analise: eventos High tem taxa de
           desperdicio bem acima de Low e Moderate.

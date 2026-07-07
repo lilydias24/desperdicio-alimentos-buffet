@@ -24,13 +24,18 @@ producao em eventos.
 
 ## Fontes dos dados
 
-A base original (**Food Wastage Data**) foi obtida no
-[Kaggle](https://www.kaggle.com/) e ingerida na camada bronze do pipeline.
-Apos limpeza, padronizacao e criacao de indicadores, a base final e
-disponibilizada na camada gold (`data/gold/food_wastage_gold.csv`), com 1618
-eventos e 21 colunas, que e o unico insumo usado pelo dashboard e pela
-analise. Ver `data/bronze/README.md` e `data/silver/README.md` para a
-rastreabilidade das camadas.
+A base original (**Food Wastage Data in Restaurant**) foi obtida no
+[Kaggle](https://www.kaggle.com/datasets/trevinhannibal/food-wastage-data-in-restaurant)
+e ingerida na camada bronze do pipeline (`data/bronze/food_wastage_bronze.csv`,
+1782 registros). Apos limpeza (remocao de 164 duplicatas completas) e
+padronizacao, a base silver (`data/silver/food_wastage_silver.csv`, 1618
+registros) alimenta a criacao dos indicadores, resultando na camada gold
+(`data/gold/food_wastage_gold.csv`), com 1618 eventos e 21 colunas, que e o
+unico insumo usado pelo dashboard e pela analise. Cada linha representa um
+registro/evento de desperdicio de alimentos (unidade de analise constante
+em todas as camadas). Ver `data/bronze/README.md` e `data/silver/README.md`
+para a rastreabilidade completa, e `notebooks/` para os notebooks originais
+de limpeza, transformacao e AED.
 
 ## Resumo das etapas anteriores
 
@@ -46,6 +51,55 @@ rastreabilidade das camadas.
    completo.
 5. **Reprodutibilidade e documentacao (Parte 4)** - Docker, compose e este
    README.
+
+## Ajustes realizados a partir dos feedbacks
+
+Pareceres formativos e somativos foram recebidos em cada entrega parcial e
+final. Principais ajustes incorporados:
+
+- **Contexto e objetivo (Entrega 1):** reduzidas redundancias do texto,
+  removida a antecipacao de solucao, e delimitado melhor o escopo
+  (unidade de analise, fonte, publico-alvo). Nota final: 9/10. Ponto ainda
+  em aberto e explicitamente reconhecido: o objetivo ainda cobre multiplos
+  fatores simultaneamente e algumas variaveis derivadas (`event_size`,
+  `event_profile`) tinham definicao operacional pouco explicita - por
+  isso, a definicao exata de cada faixa (quartis/tercis) e cada perfil
+  esta agora documentada em `docs/dicionario_indicadores.md` e nos
+  notebooks de preparacao.
+- **Especificacao do dataset (Entrega 2):** adicionada a URL completa do
+  dataset no Kaggle (antes citado sem link direto), e documentada a
+  unidade inferida (nao confirmada pela fonte) de `quantity_of_food` e
+  `wastage_food_amount`, alem do reconhecimento explicito de que
+  `purchase_history` e `seasonality` tem significado ambiguo na fonte -
+  por isso essas colunas nao sao usadas como filtros ou variaveis de
+  analise no dashboard. Nota final: 9/10.
+- **Preparacao dos dados / pipeline (Entrega 3):** o parecer elogiou a
+  camada gold orientada as perguntas do projeto, mas apontou que os
+  criterios de remocao de registros (1782 -> 1618) estavam pouco
+  discutidos e que a unidade de analise da gold precisava ser declarada
+  explicitamente. Em resposta, `data/bronze/README.md` e
+  `data/silver/README.md` agora documentam o criterio exato (164
+  duplicatas completas removidas, 0 por ausencia ou inconsistencia
+  logica) e a unidade de analise (um evento por linha) e reafirmada em
+  `docs/dicionario_indicadores.md` e na pagina "Contexto e problema" do
+  dashboard. O parecer tambem alertou que as colunas `mean_wastage_*`
+  podem gerar vazamento de informacao em modelagem preditiva futura; essa
+  ressalva foi documentada no dicionario de indicadores. Nota final: 9,0.
+- **Analise Exploratoria de Dados (AED):** o parecer somativo (nota 9,5)
+  identificou dois pontos fracos: (1) o nome do notebook nao seguia o
+  padrao pedido (`grad_grupo_3_aed.ipynb` em vez de
+  `grad_grupo_03_aed.ipynb`) - corrigido ao versionar o notebook em
+  `notebooks/grad_grupo_03_aed.ipynb`; (2) alguns rotulos usavam
+  linguagem mais forte que a evidencia descritiva sustentava (ex.:
+  "pricing como fator dominante", "efeito do armazenamento", "pricing e
+  metodo de preparo atuam de forma aditiva"), sugerindo estrutura
+  explicativa nao estimada formalmente. Essa cautela terminologica foi
+  aplicada de forma consistente no dashboard (Parte 2): os textos de
+  leitura evitam a palavra "efeito" fora do sentido estatistico formal
+  ("tamanho de efeito") e a pagina de conclusoes caracteriza o perfil
+  `Pequeno | Sit-down Dinner | High` como "perfil de maior taxa
+  observada", sem atribuir uma forma funcional (aditividade) nao
+  demonstrada.
 
 ## Etapa de analise (Parte 1)
 
@@ -67,10 +121,14 @@ Le `data/gold/food_wastage_gold.csv` e gera em `outputs/analise/`:
 - `relatorio_analise.md` - relatorio consolidado em markdown.
 
 Principais achados: Sit-down Dinner desperdica mais que os demais metodos de
-preparo (7,51% vs. 6,06-7,02%); pricing High e a variavel isolada mais
-associada ao desperdicio (8,81% vs. 5,46-5,84%); o efeito do armazenamento e
-condicional ao tipo de alimento; e o perfil de maior risco e
-`Pequeno | Sit-down Dinner | High` (~11,1%, com ressalva de amostra pequena).
+preparo (7,51% vs. 6,06-7,02%, p < 0,001); pricing High e a variavel isolada
+mais associada ao desperdicio (8,81% vs. 5,46-5,84%, p < 0,001); a diferenca
+de desperdicio por armazenamento, observada de forma descritiva na AED para
+Baked Goods e Dairy Products, **nao se confirma no teste formal por
+alimento** (p = 0,076 e p = 0,058, ambos acima de 0,05) - HE-02 e
+classificada como rejeitada na etapa de analise; e o perfil de maior taxa
+observada e `Pequeno | Sit-down Dinner | High` (~11,1%, com ressalva de
+amostra pequena).
 
 ## Indicadores
 
@@ -95,7 +153,8 @@ Resultado detalhado em `docs/checklist_validacao_gold.md`.
 
 Aplicacao Streamlit com cinco paginas:
 
-- **Contexto e problema** - problema, perguntas Q1-Q4 e amostra da base gold.
+- **Contexto e problema** - problema, publico-alvo, fonte dos dados,
+  escopo/unidade de analise, perguntas Q1-Q4 e amostra da base gold.
 - **Indicadores gerais** - taxa media de desperdicio, desperdicio medio por
   evento, desperdicio por convidado, quantidade media produzida, perfil de
   maior risco e maior diferenca entre grupos, para a selecao atual de filtros.
@@ -105,7 +164,8 @@ Aplicacao Streamlit com cinco paginas:
 - **Perfis de risco** - ranking completo dos perfis operacionais por taxa
   media de desperdicio, com tabela detalhada.
 - **Conclusoes e limitacoes** - situacao de cada hipotese (confirmada,
-  rejeitada ou parcialmente confirmada) e cuidados de interpretacao.
+  rejeitada ou nao avaliavel), com ressalvas quando aplicavel, e cuidados
+  de interpretacao.
 
 Filtros na barra lateral (validos para todas as paginas, exceto "Contexto e
 problema"): metodo de preparo, pricing, tipo de evento, tipo de alimento,
@@ -124,10 +184,14 @@ opcoes selecionadas e o botao "Limpar filtros" restaura a selecao completa.
 ├── analysis/                     # etapa de analise (Parte 1) e validacao (Parte 3)
 │   ├── analise_estatistica.py
 │   └── validacao_camada_gold.py
+├── notebooks/                    # notebooks originais das entregas parciais
+│   ├── 1_cleaning.ipynb          # bronze -> silver
+│   ├── 2_transformation.ipynb    # silver -> gold
+│   └── grad_grupo_03_aed.ipynb   # analise exploratoria de dados (AED)
 ├── data/
-│   ├── bronze/                   # dados crus (documentacao da camada)
-│   ├── silver/                   # dados limpos (documentacao da camada)
-│   └── gold/food_wastage_gold.csv# base final usada pelo app e pela analise
+│   ├── bronze/food_wastage_bronze.csv  # dado cru (1782 linhas)
+│   ├── silver/food_wastage_silver.csv  # dado limpo/padronizado (1618 linhas)
+│   └── gold/food_wastage_gold.csv      # base final usada pelo app e pela analise
 ├── docs/
 │   ├── dicionario_indicadores.md
 │   └── checklist_validacao_gold.md
@@ -185,6 +249,19 @@ Apos iniciar (por Docker ou localmente), o dashboard fica disponivel em:
   limita a generalizacao dos resultados.
 - A correlacao entre quantidade produzida e taxa de desperdicio e fraca a
   moderada (r = 0,25); quantidade, isolada, nao e bom preditor.
+- A unidade de `quantity_of_food` e `wastage_food_amount` (assumida como
+  quilogramas) e uma inferencia do grupo: a fonte original nao a declara.
+- Os atributos `purchase_history`, `seasonality` e `geographical_location`
+  tem significado operacional ambiguo na fonte e por isso nao sao usados
+  como filtros ou variaveis de analise no dashboard.
+- As colunas `mean_wastage_by_prep_method`, `mean_wastage_rate_by_food_type`
+  e `mean_wastage_rate_by_profile` foram calculadas sobre toda a base; nao
+  devem ser usadas como features em modelagem preditiva futura sem
+  recalculo restrito ao conjunto de treino (risco de vazamento de dados).
+- O dataset nao possui identificador unico por evento; a remocao de
+  duplicatas completas (164 registros, ver `data/silver/README.md`) e
+  tecnicamente justificavel mas nao elimina a possibilidade de dois
+  eventos reais terem sido registrados com os mesmos valores.
 
 ## Declaracao de uso de Inteligencia Artificial
 
