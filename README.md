@@ -172,15 +172,28 @@ problema"): metodo de preparo, pricing, tipo de evento, tipo de alimento,
 porte do evento e condicao de armazenamento. Todos iniciam com todas as
 opcoes selecionadas e o botao "Limpar filtros" restaura a selecao completa.
 
+### Personalizacao visual e elementos interativos
+
+- **Tema** (`.streamlit/config.toml`) e paleta de graficos
+  (`app/utils/palette.py`) usam a mesma familia de verdes; CSS customizado
+  (`app/utils/styling.py`) estiliza cartoes de indicador, cabecalhos,
+  sidebar e botoes.
+- **Modais** (`app/components/modals.py`, via `st.dialog`): "Glossario" e
+  "Como ler" na barra lateral, e "Ver detalhes" de um perfil especifico na
+  pagina *Perfis de risco* (com badge de nivel de risco).
+- **Controles interativos**: alternancia boxplot/violin no grafico de
+  metodo de preparo (*Indicadores gerais*) e slider de quantos perfis
+  mostrar no ranking (*Perfis de risco*).
+
 ## Estrutura do repositorio
 
 ```text
 .
 ├── app/                          # dashboard Streamlit (Parte 2)
 │   ├── app.py                    # ponto de entrada
-│   ├── components/               # filtros, indicadores e graficos
+│   ├── components/               # filtros, indicadores, graficos e modais
 │   ├── services/                 # carregamento e filtragem da base gold
-│   └── utils/                    # formatacao de numeros e percentuais
+│   └── utils/                    # formatacao, paleta de cores e CSS customizado
 ├── analysis/                     # etapa de analise (Parte 1) e validacao (Parte 3)
 │   ├── analise_estatistica.py
 │   └── validacao_camada_gold.py

@@ -10,10 +10,10 @@ from utils.formatting import format_delta_percent, format_number, format_percent
 
 
 def compute_group_gap(df: pd.DataFrame, group_col: str, value_col: str, min_count: int = 5) -> dict | None:
-    """Maior diferenca de media entre categorias de `group_col`.
+    """Maior diferença de média entre categorias de `group_col`.
 
-    Grupos com menos de `min_count` observacoes sao ignorados para evitar
-    que uma categoria rara distorca a comparacao.
+    Grupos com menos de `min_count` observações são ignorados para evitar
+    que uma categoria rara distorça a comparação.
     """
     means = (
         df.groupby(group_col, observed=True)[value_col]
@@ -34,7 +34,7 @@ def compute_group_gap(df: pd.DataFrame, group_col: str, value_col: str, min_coun
 
 
 def render_indicator_cards(df: pd.DataFrame) -> None:
-    """Renderiza os cartoes de indicadores principais para o dataframe filtrado."""
+    """Renderiza os cartões de indicadores principais para o dataframe filtrado."""
     if df.empty:
         st.warning("Nenhum registro corresponde aos filtros selecionados.")
         return
@@ -50,23 +50,23 @@ def render_indicator_cards(df: pd.DataFrame) -> None:
     gap = compute_group_gap(df, "preparation_method", "wastage_rate")
 
     col1, col2, col3 = st.columns(3)
-    col1.metric("Taxa media de desperdicio", format_percent(taxa_media))
-    col2.metric("Desperdicio medio por evento", f"{format_number(desperdicio_evento)} kg/un")
-    col3.metric("Desperdicio por convidado", format_number(desperdicio_convidado, decimals=3))
+    col1.metric("Taxa média de desperdício", format_percent(taxa_media))
+    col2.metric("Desperdício médio por evento", f"{format_number(desperdicio_evento)} kg/un")
+    col3.metric("Desperdício por convidado", format_number(desperdicio_convidado, decimals=3))
 
     col4, col5, col6 = st.columns(3)
-    col4.metric("Quantidade media produzida", format_number(quantidade_media))
+    col4.metric("Quantidade média produzida", format_number(quantidade_media))
 
     with col5:
         st.caption("Perfil de maior risco")
         st.markdown(f"#### {top_profile['event_profile']}")
         st.caption(
-            f"Taxa media {format_percent(top_profile['taxa_media'])} "
+            f"Taxa média {format_percent(top_profile['taxa_media'])} "
             f"em {int(top_profile['n_eventos'])} evento(s)."
         )
 
     with col6:
-        st.caption("Maior diferenca entre grupos")
+        st.caption("Maior diferença entre grupos")
         if gap is not None:
             st.markdown(f"#### {format_delta_percent(gap['diff'])}")
             st.caption(
@@ -75,9 +75,9 @@ def render_indicator_cards(df: pd.DataFrame) -> None:
             )
         else:
             st.markdown("#### -")
-            st.caption("Grupos insuficientes para comparacao com os filtros atuais.")
+            st.caption("Grupos insuficientes para comparação com os filtros atuais.")
 
     st.caption(
-        f"Indicadores calculados sobre {len(df):,} registro(s) apos aplicacao dos filtros."
+        f"Indicadores calculados sobre {len(df):,} registro(s) após aplicação dos filtros."
         .replace(",", ".")
     )

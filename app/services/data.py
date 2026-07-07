@@ -62,7 +62,7 @@ def load_data(path: str | Path = DEFAULT_DATA_PATH) -> pd.DataFrame:
     path = Path(path)
     if not path.exists():
         raise FileNotFoundError(
-            f"Base gold nao encontrada em '{path}'. "
+            f"Base gold não encontrada em '{path}'. "
             "Copie 'food_wastage_gold.csv' para 'data/gold/' antes de iniciar o dashboard."
         )
 
@@ -71,7 +71,7 @@ def load_data(path: str | Path = DEFAULT_DATA_PATH) -> pd.DataFrame:
     missing = [col for col in REQUIRED_COLUMNS if col not in df.columns]
     if missing:
         raise ValueError(
-            "A base gold nao contem as colunas obrigatorias: " + ", ".join(missing)
+            "A base gold não contém as colunas obrigatórias: " + ", ".join(missing)
         )
 
     for col in NUMERIC_COLUMNS:

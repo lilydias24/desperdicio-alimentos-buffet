@@ -1,7 +1,7 @@
-"""Construtores de graficos Plotly usados nas paginas do dashboard.
+"""Construtores de gráficos Plotly usados nas páginas do dashboard.
 
-Cada funcao retorna uma figura pronta para `st.plotly_chart`, mantendo a
-logica de plot separada das paginas para facilitar reuso e testes visuais.
+Cada função retorna uma figura pronta para `st.plotly_chart`, mantendo a
+lógica de plot separada das páginas para facilitar reuso e testes visuais.
 """
 
 from __future__ import annotations
@@ -10,27 +10,15 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
+from utils.palette import (
+    CATEGORICAL_PALETTE,
+    GREEN_SCALE,
+    NEUTRAL_DARK,
+    PRICING_COLOR_MAP,
+    PRIMARY_GREEN,
+)
+
 TEMPLATE = "plotly_white"
-
-# Paleta verde-escuro/neutra usada em todo o dashboard, para manter
-# consistencia visual com o tema do app (ver .streamlit/config.toml).
-CATEGORICAL_PALETTE = [
-    "#1B4332",  # verde muito escuro
-    "#40916C",  # verde medio
-    "#95D5B2",  # verde claro
-    "#588157",  # verde oliva
-    "#344E41",  # verde quase preto
-    "#A3B18A",  # verde acinzentado (neutro)
-]
-PRIMARY_GREEN = "#2D6A4F"
-NEUTRAL_DARK = "#1B1B1B"
-GREEN_SCALE = "Greens"
-
-PRICING_COLOR_MAP = {
-    "Low": "#95D5B2",
-    "Moderate": "#40916C",
-    "High": "#1B4332",
-}
 
 
 def distribution_plot(
@@ -40,7 +28,7 @@ def distribution_plot(
     kind: str = "box",
     title: str | None = None,
 ) -> go.Figure:
-    """Boxplot ou violin plot da distribuicao de `value_col` por `group_col`."""
+    """Boxplot ou violin plot da distribuição de `value_col` por `group_col`."""
     plot_fn = px.violin if kind == "violin" else px.box
     extra = {"box": True, "points": "outliers"} if kind == "violin" else {"points": "outliers"}
     fig = plot_fn(
@@ -63,7 +51,7 @@ def group_mean_bar(
     value_col: str = "wastage_rate",
     title: str | None = None,
 ) -> go.Figure:
-    """Barras com a media de `value_col` por categoria de `group_col`."""
+    """Barras com a média de `value_col` por categoria de `group_col`."""
     summary = (
         df.groupby(group_col, observed=True)[value_col]
         .agg(media="mean", n="size")
@@ -81,7 +69,7 @@ def group_mean_bar(
         color_discrete_sequence=[PRIMARY_GREEN],
     )
     fig.update_traces(textposition="outside", marker_line_width=0)
-    fig.update_layout(xaxis_title=group_col, yaxis_title=f"Media de {value_col}")
+    fig.update_layout(xaxis_title=group_col, yaxis_title=f"Média de {value_col}")
     return fig
 
 
@@ -92,7 +80,7 @@ def interaction_heatmap(
     value_col: str = "wastage_rate",
     title: str | None = None,
 ) -> go.Figure:
-    """Heatmap da media de `value_col` cruzando `row_col` x `col_col`."""
+    """Heatmap da média de `value_col` cruzando `row_col` x `col_col`."""
     pivot = df.pivot_table(index=row_col, columns=col_col, values=value_col, aggfunc="mean")
     fig = px.imshow(
         pivot,
@@ -111,7 +99,7 @@ def interaction_heatmap(
 
 
 def risk_ranking_bar(profiles: pd.DataFrame, top_n: int = 10) -> go.Figure:
-    """Ranking horizontal dos perfis operacionais com maior taxa media de desperdicio."""
+    """Ranking horizontal dos perfis operacionais com maior taxa média de desperdício."""
     top = profiles.head(top_n).sort_values("taxa_media")
     fig = px.bar(
         top,
@@ -121,13 +109,13 @@ def risk_ranking_bar(profiles: pd.DataFrame, top_n: int = 10) -> go.Figure:
         text=top["taxa_media"].round(2),
         hover_data={"n_eventos": True, "baixa_confianca": True},
         template=TEMPLATE,
-        title=f"Top {top_n} perfis por taxa media de desperdicio",
+        title=f"Top {top_n} perfis por taxa média de desperdício",
         color="taxa_media",
         color_continuous_scale=GREEN_SCALE,
     )
     fig.update_traces(textposition="outside")
     fig.update_layout(
-        xaxis_title="Taxa media de wastage_rate (%)",
+        xaxis_title="Taxa média de wastage_rate (%)",
         yaxis_title="Perfil (porte | preparo | pricing)",
         coloraxis_showscale=False,
     )
@@ -157,5 +145,5 @@ def quantity_vs_wastage_scatter(
         **color_kwargs,
     )
     fig.update_traces(marker=dict(line=dict(width=0.5, color=NEUTRAL_DARK)))
-    fig.update_layout(xaxis_title="Quantidade de alimento produzida", yaxis_title="Taxa de desperdicio (%)")
+    fig.update_layout(xaxis_title="Quantidade de alimento produzida", yaxis_title="Taxa de desperdício (%)")
     return fig

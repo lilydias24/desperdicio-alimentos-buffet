@@ -1,8 +1,8 @@
-"""Dashboard Streamlit - Investigacao do Desperdicio de Alimentos em Buffets.
+"""Dashboard Streamlit - Investigação do Desperdício de Alimentos em Buffets.
 
-Ponto de entrada da aplicacao (Parte 2 da entrega final). Concentra a
-navegacao entre paginas e delega calculo de indicadores, filtros e
-graficos para os modulos em `app/services` e `app/components`.
+Ponto de entrada da aplicação (Parte 2 da entrega final). Concentra a
+navegação entre páginas e delega cálculo de indicadores, filtros e
+gráficos para os módulos em `app/services` e `app/components`.
 
 Uso:
     streamlit run app/app.py
@@ -27,77 +27,79 @@ from components.charts import (
 )
 from components.filters import render_sidebar_filters
 from components.indicators import render_indicator_cards
+from components.modals import glossario_modal, interpretacao_modal, perfil_detalhe_modal
 from services.data import apply_filters, load_data, risk_profiles
+from utils.styling import inject_custom_css, render_hero_banner
 
 PAGES = [
     "Contexto e problema",
     "Indicadores gerais",
-    "Analises por pergunta",
+    "Análises por pergunta",
     "Perfis de risco",
-    "Conclusoes e limitacoes",
+    "Conclusões e limitações",
 ]
 
 
 def page_contexto(df) -> None:
-    st.title("Desperdicio de alimentos em servicos de buffet")
+    st.title("Desperdício de alimentos em serviços de buffet")
     st.markdown(
         """
-        Servicos de buffet precisam estimar, com antecedencia, quanto
+        Serviços de buffet precisam estimar, com antecedência, quanto
         alimento preparar para cada evento. Errar essa estimativa gera
-        desperdicio de comida, custo operacional e impacto ambiental.
+        desperdício de comida, custo operacional e impacto ambiental.
         Este dashboard explora um conjunto de eventos de buffet para
-        entender **em que condicoes o desperdicio tende a ser maior**,
+        entender **em que condições o desperdício tende a ser maior**,
         usando a camada gold do pipeline do projeto
         (`data/gold/food_wastage_gold.csv`).
         """
     )
 
-    st.subheader("Publico-alvo")
+    st.subheader("Público-alvo")
     st.markdown(
         """
-        Equipes de planejamento e operacao de servicos de buffet
-        (gestores de producao, compras e eventos) que precisam decidir
-        quanto alimento preparar e identificar combinacoes operacionais
-        (metodo de preparo, armazenamento, pricing, porte do evento) com
-        maior risco de desperdicio.
+        Equipes de planejamento e operação de serviços de buffet
+        (gestores de produção, compras e eventos) que precisam decidir
+        quanto alimento preparar e identificar combinações operacionais
+        (método de preparo, armazenamento, pricing, porte do evento) com
+        maior risco de desperdício.
         """
     )
 
-    st.subheader("Fonte, escopo e unidade de analise")
+    st.subheader("Fonte, escopo e unidade de análise")
     st.markdown(
         """
         - **Fonte:** dataset *Food Wastage Data in Restaurant*, publicado
           no [Kaggle](https://www.kaggle.com/datasets/trevinhannibal/food-wastage-data-in-restaurant).
-        - **Unidade de analise:** cada linha representa **um
-          registro/evento de desperdicio de alimentos** (um preparo/servico
-          associado a um evento) - a base gold nao e agregada por categoria.
-        - **Escopo e recorte:** dataset sintetico/educacional, sem data de
-          coleta, identificador unico de evento ou recorte geografico real
+        - **Unidade de análise:** cada linha representa **um
+          registro/evento de desperdício de alimentos** (um preparo/serviço
+          associado a um evento) — a base gold não é agregada por categoria.
+        - **Escopo e recorte:** dataset sintético/educacional, sem data de
+          coleta, identificador único de evento ou recorte geográfico real
           documentados pela fonte; os valores de `quantity_of_food` e
-          `wastage_food_amount` sao tratados em uma unidade assumida (ver
+          `wastage_food_amount` são tratados em uma unidade assumida (ver
           `docs/dicionario_indicadores.md`). Os resultados ilustram o
-          metodo de analise e nao devem ser generalizados para operacoes
-          reais sem validacao adicional.
+          método de análise e não devem ser generalizados para operações
+          reais sem validação adicional.
         """
     )
 
-    st.subheader("Perguntas analiticas do projeto")
+    st.subheader("Perguntas analíticas do projeto")
     st.markdown(
         """
-        - **Q1** - O metodo de preparo e as condicoes de armazenamento
-          influenciam o volume de desperdicio?
-        - **Q2** - Como o tipo e o porte do evento se relacionam com o
-          volume de desperdicio?
-        - **Q3** - Existe relacao entre a quantidade produzida, a faixa de
-          preco (pricing) e a taxa de desperdicio?
-        - **Q4** - Quais combinacoes de caracteristicas operacionais estao
-          associadas aos maiores niveis de desperdicio?
+        - **Q1** — O método de preparo e as condições de armazenamento
+          influenciam o volume de desperdício?
+        - **Q2** — Como o tipo e o porte do evento se relacionam com o
+          volume de desperdício?
+        - **Q3** — Existe relação entre a quantidade produzida, a faixa de
+          preço (pricing) e a taxa de desperdício?
+        - **Q4** — Quais combinações de características operacionais estão
+          associadas aos maiores níveis de desperdício?
         """
     )
 
     st.subheader("Base de dados")
     col1, col2, col3 = st.columns(3)
-    col1.metric("Registros (apos filtros globais de qualidade)", f"{len(df):,}".replace(",", "."))
+    col1.metric("Registros (após filtros globais de qualidade)", f"{len(df):,}".replace(",", "."))
     col2.metric("Colunas", len(df.columns))
     col3.metric("Perfis operacionais distintos", df["event_profile"].nunique())
 
@@ -105,14 +107,14 @@ def page_contexto(df) -> None:
         st.dataframe(df.head(20), use_container_width=True)
 
     st.info(
-        "Os filtros na barra lateral valem para todas as demais paginas do "
-        "dashboard (Indicadores gerais, Analises por pergunta e Perfis de risco)."
+        "Os filtros na barra lateral valem para todas as demais páginas do "
+        "dashboard (Indicadores gerais, Análises por pergunta e Perfis de risco)."
     )
 
 
 def page_indicadores(df_filtered) -> None:
     st.title("Indicadores gerais")
-    st.caption("Resumo do desperdicio para a selecao atual de filtros.")
+    st.caption("Resumo do desperdício para a seleção atual de filtros.")
     render_indicator_cards(df_filtered)
 
     if df_filtered.empty:
@@ -126,34 +128,43 @@ def page_indicadores(df_filtered) -> None:
                 df_filtered,
                 "event_type",
                 "wastage_rate",
-                title="Taxa media de desperdicio por tipo de evento",
+                title="Taxa média de desperdício por tipo de evento",
             ),
             use_container_width=True,
         )
         st.caption(
-            "Compara a taxa media de desperdicio entre os tipos de evento "
-            "presentes na selecao atual; barras mais altas indicam eventos "
-            "proporcionalmente mais desperdicadores."
+            "Compara a taxa média de desperdício entre os tipos de evento "
+            "presentes na seleção atual; barras mais altas indicam eventos "
+            "proporcionalmente mais desperdiçadores."
         )
     with col2:
+        kind_label = st.radio(
+            "Tipo de gráfico",
+            options=["Boxplot", "Violin"],
+            horizontal=True,
+            label_visibility="collapsed",
+            key="indicadores_kind_toggle",
+        )
+        kind = "violin" if kind_label == "Violin" else "box"
         st.plotly_chart(
             distribution_plot(
                 df_filtered,
                 "preparation_method",
                 "wastage_rate",
-                kind="box",
-                title="Distribuicao da taxa de desperdicio por metodo de preparo",
+                kind=kind,
+                title="Distribuição da taxa de desperdício por método de preparo",
             ),
             use_container_width=True,
         )
         st.caption(
-            "O boxplot mostra a dispersao da taxa de desperdicio dentro de "
-            "cada metodo de preparo, alem da mediana e possiveis valores atipicos."
+            "O boxplot/violin mostra a dispersão da taxa de desperdício "
+            "dentro de cada método de preparo, além da mediana e possíveis "
+            "valores atípicos."
         )
 
 
 def page_perguntas(df_filtered) -> None:
-    st.title("Analises por pergunta")
+    st.title("Análises por pergunta")
     if df_filtered.empty:
         st.warning("Nenhum registro corresponde aos filtros selecionados.")
         return
@@ -161,14 +172,14 @@ def page_perguntas(df_filtered) -> None:
     tab_q1, tab_q2, tab_q3, tab_q4 = st.tabs(["Q1", "Q2", "Q3", "Q4"])
 
     with tab_q1:
-        st.subheader("Q1 - Metodo de preparo, armazenamento e tipo de alimento")
+        st.subheader("Q1 — Método de preparo, armazenamento e tipo de alimento")
         st.plotly_chart(
             distribution_plot(
                 df_filtered,
                 "type_of_food",
                 "wastage_rate",
                 kind="violin",
-                title="Distribuicao da taxa de desperdicio por tipo de alimento",
+                title="Distribuição da taxa de desperdício por tipo de alimento",
             ),
             use_container_width=True,
         )
@@ -178,33 +189,33 @@ def page_perguntas(df_filtered) -> None:
                 "storage_conditions",
                 "type_of_food",
                 "wastage_rate",
-                title="Taxa media de desperdicio: armazenamento x tipo de alimento",
+                title="Taxa média de desperdício: armazenamento x tipo de alimento",
             ),
             use_container_width=True,
         )
         st.markdown(
-            "**Leitura:** o violin plot mostra como a taxa de desperdicio se "
+            "**Leitura:** o violin plot mostra como a taxa de desperdício se "
             "distribui dentro de cada tipo de alimento (forma mais larga = "
             "mais eventos naquela faixa de valor). O heatmap evidencia se a "
-            "diferenca associada a condicao de armazenamento muda conforme "
-            "o alimento, em vez de ser constante entre categorias - sem "
-            "testes formais de significancia nesta pagina, essas sao "
-            "comparacoes descritivas."
+            "diferença associada à condição de armazenamento muda conforme "
+            "o alimento, em vez de ser constante entre categorias — sem "
+            "testes formais de significância nesta página, essas são "
+            "comparações descritivas."
         )
         st.caption(
-            "Achado da AED (base completa): Sit-down Dinner tem taxa media de "
-            "7,51% contra 6,06% de Finger Food. O armazenamento nao muda a "
-            "media geral (Refrigerado 6,88% vs. Temp. ambiente 6,86%). Na "
-            "AED descritiva, Baked Goods e Dairy Products desperdicam cerca "
-            "de 1,3 a 1,6 p.p. a mais em temperatura ambiente - mas o teste "
-            "de Welch formal por alimento (Parte 1) nao confirma essa "
-            "diferenca como estatisticamente significativa (p = 0,076 e "
-            "p = 0,058, respectivamente); tratar como padrao sugestivo, "
-            "nao como achado confirmado."
+            "Achado da AED (base completa): Sit-down Dinner tem taxa média de "
+            "7,51% contra 6,06% de Finger Food. O armazenamento não muda a "
+            "média geral (Refrigerado 6,88% vs. Temp. ambiente 6,86%). Na "
+            "AED descritiva, Baked Goods e Dairy Products desperdiçam cerca "
+            "de 1,3 a 1,6 p.p. a mais em temperatura ambiente — mas o teste "
+            "de Welch formal por alimento (Parte 1) não confirma essa "
+            "diferença como estatisticamente significativa (p = 0,076 e "
+            "p = 0,058, respectivamente); tratar como padrão sugestivo, "
+            "não como achado confirmado."
         )
 
     with tab_q2:
-        st.subheader("Q2 - Tipo e porte do evento")
+        st.subheader("Q2 — Tipo e porte do evento")
         col1, col2 = st.columns(2)
         with col1:
             st.plotly_chart(
@@ -212,7 +223,7 @@ def page_perguntas(df_filtered) -> None:
                     df_filtered,
                     "event_type",
                     "wastage_per_guest",
-                    title="Desperdicio medio por convidado, por tipo de evento",
+                    title="Desperdício médio por convidado, por tipo de evento",
                 ),
                 use_container_width=True,
             )
@@ -223,31 +234,31 @@ def page_perguntas(df_filtered) -> None:
                     "event_size",
                     "wastage_per_guest",
                     kind="box",
-                    title="Distribuicao do desperdicio por convidado, por porte do evento",
+                    title="Distribuição do desperdício por convidado, por porte do evento",
                 ),
                 use_container_width=True,
             )
         st.markdown(
-            "**Leitura:** compara o desperdicio per capita entre tipos de "
+            "**Leitura:** compara o desperdício per capita entre tipos de "
             "evento e portes de evento. Se as caixas/barras forem parecidas "
-            "entre portes, o porte isolado explica pouco do desperdicio por "
-            "convidado; diferencas mais claras aparecem por tipo de evento."
+            "entre portes, o porte isolado explica pouco do desperdício por "
+            "convidado; diferenças mais claras aparecem por tipo de evento."
         )
         st.caption(
-            "Achado da AED (base completa): desperdicio por convidado e quase "
-            "constante entre portes (Pequeno 0,088, Medio 0,089, Grande "
-            "0,092). Entre tipos de evento a diferenca tambem e pequena "
+            "Achado da AED (base completa): desperdício por convidado é quase "
+            "constante entre portes (Pequeno 0,088, Médio 0,089, Grande "
+            "0,092). Entre tipos de evento a diferença também é pequena "
             "(Wedding 6,96% vs. Birthday/Corporate ~6,82%), sugerindo que "
-            "porte isolado nao e um bom preditor do desperdicio per capita."
+            "porte isolado não é um bom preditor do desperdício per capita."
         )
 
     with tab_q3:
-        st.subheader("Q3 - Quantidade produzida, pricing e taxa de desperdicio")
+        st.subheader("Q3 — Quantidade produzida, pricing e taxa de desperdício")
         st.plotly_chart(
             quantity_vs_wastage_scatter(
                 df_filtered,
                 color_col="pricing",
-                title="Quantidade produzida x taxa de desperdicio",
+                title="Quantidade produzida x taxa de desperdício",
             ),
             use_container_width=True,
         )
@@ -257,47 +268,47 @@ def page_perguntas(df_filtered) -> None:
                 "pricing",
                 "preparation_method",
                 "wastage_rate",
-                title="Taxa media de desperdicio: pricing x metodo de preparo",
+                title="Taxa média de desperdício: pricing x método de preparo",
             ),
             use_container_width=True,
         )
         corr = df_filtered["quantity_of_food"].corr(df_filtered["wastage_rate"])
         st.markdown(
-            f"**Leitura:** a correlacao linear entre quantidade produzida e "
-            f"taxa de desperdicio na selecao atual e **r = {corr:.3f}**. O "
-            "heatmap mostra a taxa media observada em cada combinacao de "
-            "pricing e metodo de preparo; combinacoes com taxa bem acima "
-            "ou abaixo do esperado pelas medias isoladas de cada variavel "
-            "indicam um perfil de risco especifico, sem que isso demonstre "
-            "uma forma de interacao estatistica formal entre os fatores."
+            f"**Leitura:** a correlação linear entre quantidade produzida e "
+            f"taxa de desperdício na seleção atual é **r = {corr:.3f}**. O "
+            "heatmap mostra a taxa média observada em cada combinação de "
+            "pricing e método de preparo; combinações com taxa bem acima "
+            "ou abaixo do esperado pelas médias isoladas de cada variável "
+            "indicam um perfil de risco específico, sem que isso demonstre "
+            "uma forma de interação estatística formal entre os fatores."
         )
         st.caption(
-            "Achado da AED (base completa): pricing High tem taxa media de "
-            "8,81% contra 5,46% (Low) e 5,84% (Moderate) - a maior diferenca "
-            "isolada entre variaveis categoricas do estudo. A quantidade "
-            "produzida tem correlacao fraca a moderada com a taxa de "
-            "desperdicio (r = 0,25 na base completa); a celula mais critica "
-            "do heatmap e pricing High + Sit-down Dinner (9,16%), e a mais "
-            "baixa e pricing Low + Finger Food (5,00%)."
+            "Achado da AED (base completa): pricing High tem taxa média de "
+            "8,81% contra 5,46% (Low) e 5,84% (Moderate) — a maior diferença "
+            "isolada entre variáveis categóricas do estudo. A quantidade "
+            "produzida tem correlação fraca a moderada com a taxa de "
+            "desperdício (r = 0,25 na base completa); a célula mais crítica "
+            "do heatmap é pricing High + Sit-down Dinner (9,16%), e a mais "
+            "baixa é pricing Low + Finger Food (5,00%)."
         )
 
     with tab_q4:
-        st.subheader("Q4 - Perfis operacionais de maior risco")
+        st.subheader("Q4 — Perfis operacionais de maior risco")
         profiles = risk_profiles(df_filtered)
         st.plotly_chart(risk_ranking_bar(profiles, top_n=10), use_container_width=True)
         st.markdown(
-            "**Leitura:** cada perfil combina porte do evento, metodo de "
+            "**Leitura:** cada perfil combina porte do evento, método de "
             "preparo e pricing (`event_profile`). Perfis com poucos eventos "
-            "(marcados como baixa confianca na tabela da pagina *Perfis de "
-            "risco*) podem ter medias instaveis e devem ser interpretados "
+            "(marcados como baixa confiança na tabela da página *Perfis de "
+            "risco*) podem ter médias instáveis e devem ser interpretados "
             "com cautela."
         )
         st.caption(
-            "Achado da AED (base completa, 27 perfis): o maior risco e "
-            "'Pequeno | Sit-down Dinner | High' (~11,14% de taxa media, 18 "
-            "eventos - amostra pequena). Entre os perfis com mais eventos, "
-            "'Medio | Sit-down Dinner | High' e 'Grande | Sit-down Dinner | "
-            "High' tambem aparecem no topo, por volta de 9%."
+            "Achado da AED (base completa, 27 perfis): o maior risco é "
+            "'Pequeno | Sit-down Dinner | High' (~11,14% de taxa média, 18 "
+            "eventos — amostra pequena). Entre os perfis com mais eventos, "
+            "'Médio | Sit-down Dinner | High' e 'Grande | Sit-down Dinner | "
+            "High' também aparecem no topo, por volta de 9%."
         )
 
 
@@ -309,25 +320,47 @@ def page_perfis(df_filtered) -> None:
 
     profiles = risk_profiles(df_filtered)
     top = profiles.iloc[0]
+    media_geral = df_filtered["wastage_rate"].mean()
 
     st.markdown(
-        f"O perfil com maior taxa media de desperdicio na selecao atual e "
-        f"**{top['event_profile']}**, com taxa media de **{top['taxa_media']:.2f}%** "
+        f"O perfil com maior taxa média de desperdício na seleção atual é "
+        f"**{top['event_profile']}**, com taxa média de **{top['taxa_media']:.2f}%** "
         f"em **{int(top['n_eventos'])}** evento(s)."
     )
 
-    st.plotly_chart(risk_ranking_bar(profiles, top_n=15), use_container_width=True)
+    col_ranking, col_detalhe = st.columns([3, 1])
+    with col_ranking:
+        top_n = st.slider(
+            "Quantos perfis mostrar no ranking",
+            min_value=5,
+            max_value=len(profiles),
+            value=min(15, len(profiles)),
+            key="perfis_top_n",
+        )
+        st.plotly_chart(risk_ranking_bar(profiles, top_n=top_n), use_container_width=True)
+    with col_detalhe:
+        with st.container(border=True):
+            st.markdown("**Consultar um perfil**")
+            perfil_escolhido = st.selectbox(
+                "Perfil",
+                options=profiles["event_profile"],
+                label_visibility="collapsed",
+                key="perfis_selectbox",
+            )
+            if st.button("Ver detalhes", use_container_width=True):
+                linha = profiles.loc[profiles["event_profile"] == perfil_escolhido].iloc[0]
+                perfil_detalhe_modal(linha, media_geral, len(profiles))
 
     st.subheader("Tabela completa de perfis")
     display_cols = {
         "rank_risco": "Rank",
         "event_profile": "Perfil (porte | preparo | pricing)",
-        "n_eventos": "N eventos",
-        "taxa_media": "Taxa media (%)",
+        "n_eventos": "Nº de eventos",
+        "taxa_media": "Taxa média (%)",
         "taxa_mediana": "Taxa mediana (%)",
-        "desperdicio_medio": "Desperdicio medio",
-        "convidados_medios": "Convidados medios",
-        "baixa_confianca": "Baixa confianca (n < 3)",
+        "desperdicio_medio": "Desperdício médio",
+        "convidados_medios": "Convidados médios",
+        "baixa_confianca": "Baixa confiança (n < 3)",
     }
     rounded = profiles.round(
         {"taxa_media": 2, "taxa_mediana": 2, "desperdicio_medio": 2, "convidados_medios": 1}
@@ -338,119 +371,119 @@ def page_perfis(df_filtered) -> None:
         hide_index=True,
     )
     st.caption(
-        "Perfis marcados como 'baixa confianca' tem menos de 3 eventos na "
-        "selecao atual; suas medias podem variar muito com poucos casos a mais."
+        "Perfis marcados como 'baixa confiança' têm menos de 3 eventos na "
+        "seleção atual; suas médias podem variar muito com poucos casos a mais."
     )
 
 
 def page_conclusoes() -> None:
-    st.title("Conclusoes e limitacoes")
+    st.title("Conclusões e limitações")
 
-    st.subheader("Hipoteses avaliadas (base completa)")
+    st.subheader("Hipóteses avaliadas (base completa)")
     st.caption(
-        "Cada hipotese e classificada como **Confirmada**, **Rejeitada** ou "
-        "**Nao avaliavel** (dados insuficientes), conforme a etapa de "
-        "analise estatistica final (ver `analysis/analise_estatistica.py` "
+        "Cada hipótese é classificada como **Confirmada**, **Rejeitada** ou "
+        "**Não avaliável** (dados insuficientes), conforme a etapa de "
+        "análise estatística final (ver `analysis/analise_estatistica.py` "
         "para os testes formais: Welch, Kruskal-Wallis, bootstrap e "
-        "correlacao). Nenhuma das seis ficou como nao avaliavel: a base "
+        "correlação). Nenhuma das seis ficou como não avaliável: a base "
         "gold permitiu avaliar todas."
     )
     hipoteses = [
         {
-            "Hipotese": "HE-01 (Q1)",
-            "Descricao": "Sit-down Dinner tem maior taxa de desperdicio que os demais metodos de preparo.",
+            "Hipótese": "HE-01 (Q1)",
+            "Descrição": "Sit-down Dinner tem maior taxa de desperdício que os demais métodos de preparo.",
             "Achado": "7,51% vs. 6,06% (Finger Food) e 7,02% (Buffet).",
-            "Situacao": "Confirmada",
+            "Situação": "Confirmada",
             "Ressalva": "-",
         },
         {
-            "Hipotese": "HE-02 (Q1)",
-            "Descricao": "A diferenca de desperdicio associada ao armazenamento depende do tipo de alimento.",
-            "Achado": "Sem diferenca na media geral (6,88% vs. 6,86%). Na AED (descritiva), Baked Goods/Dairy pioram ~1,3-1,6 p.p. em temp. ambiente, mas o teste de Welch formal por alimento nao confirma significancia (p = 0,076 em Baked Goods; p = 0,058 em Dairy Products; demais alimentos tambem nao significativos).",
-            "Situacao": "Rejeitada",
-            "Ressalva": "Padrao descritivo sugestivo (mesma direcao em 2 de 5 alimentos), mas nao sustentado pelo teste formal ao nivel de 5%; tratar como hipotese em aberto, nao como achado confirmado.",
+            "Hipótese": "HE-02 (Q1)",
+            "Descrição": "A diferença de desperdício associada ao armazenamento depende do tipo de alimento.",
+            "Achado": "Sem diferença na média geral (6,88% vs. 6,86%). Na AED (descritiva), Baked Goods/Dairy pioram ~1,3-1,6 p.p. em temp. ambiente, mas o teste de Welch formal por alimento não confirma significância (p = 0,076 em Baked Goods; p = 0,058 em Dairy Products; demais alimentos também não significativos).",
+            "Situação": "Rejeitada",
+            "Ressalva": "Padrão descritivo sugestivo (mesma direção em 2 de 5 alimentos), mas não sustentado pelo teste formal ao nível de 5%; tratar como hipótese em aberto, não como achado confirmado.",
         },
         {
-            "Hipotese": "HE-03 (Q3)",
-            "Descricao": "Pricing High esta associado a maior taxa de desperdicio.",
+            "Hipótese": "HE-03 (Q3)",
+            "Descrição": "Pricing High está associado a maior taxa de desperdício.",
             "Achado": "8,81% (High) vs. 5,46% (Low) e 5,84% (Moderate).",
-            "Situacao": "Confirmada",
+            "Situação": "Confirmada",
             "Ressalva": "-",
         },
         {
-            "Hipotese": "HE-04 (Q3)",
-            "Descricao": "Maior quantidade produzida se associa a maior taxa de desperdicio.",
-            "Achado": "7,54% (Alta) vs. 6,28% (Baixa); correlacao r = 0,25 (fraca a moderada).",
-            "Situacao": "Confirmada",
-            "Ressalva": "Associacao fraca a moderada; quantidade isolada nao e bom preditor.",
+            "Hipótese": "HE-04 (Q3)",
+            "Descrição": "Maior quantidade produzida se associa a maior taxa de desperdício.",
+            "Achado": "7,54% (Alta) vs. 6,28% (Baixa); correlação r = 0,25 (fraca a moderada).",
+            "Situação": "Confirmada",
+            "Ressalva": "Associação fraca a moderada; quantidade isolada não é bom preditor.",
         },
         {
-            "Hipotese": "HE-05 (Q4)",
-            "Descricao": "Existem perfis operacionais que concentram maior risco de desperdicio.",
-            "Achado": "'Pequeno | Sit-down Dinner | High' lidera com ~11,1% (18 eventos); High + Sit-down Dinner e o perfil de maior taxa observada em todo porte.",
-            "Situacao": "Confirmada",
-            "Ressalva": "Perfil-lider tem amostra pequena (18 eventos); ler com cautela.",
+            "Hipótese": "HE-05 (Q4)",
+            "Descrição": "Existem perfis operacionais que concentram maior risco de desperdício.",
+            "Achado": "'Pequeno | Sit-down Dinner | High' lidera com ~11,1% (18 eventos); High + Sit-down Dinner é o perfil de maior taxa observada em todo porte.",
+            "Situação": "Confirmada",
+            "Ressalva": "Perfil-líder tem amostra pequena (18 eventos); ler com cautela.",
         },
         {
-            "Hipotese": "HE-06 (Q2)",
-            "Descricao": "O porte do evento, isolado, e bom preditor do desperdicio por convidado.",
-            "Achado": "Desperdicio por convidado quase constante entre portes (0,088 a 0,092).",
-            "Situacao": "Rejeitada",
+            "Hipótese": "HE-06 (Q2)",
+            "Descrição": "O porte do evento, isolado, é bom preditor do desperdício por convidado.",
+            "Achado": "Desperdício por convidado quase constante entre portes (0,088 a 0,092).",
+            "Situação": "Rejeitada",
             "Ressalva": "-",
         },
     ]
-    st.table(pd.DataFrame(hipoteses).set_index("Hipotese"))
+    st.table(pd.DataFrame(hipoteses).set_index("Hipótese"))
 
-    st.subheader("Conclusoes tecnicas")
+    st.subheader("Conclusões técnicas")
     st.markdown(
         """
-        - O metodo de preparo (`preparation_method`) esta associado a
-          diferencas consistentes na taxa media de desperdicio: Sit-down
-          Dinner desperdica mais que Buffet e Finger Food, em todas as
+        - O método de preparo (`preparation_method`) está associado a
+          diferenças consistentes na taxa média de desperdício: Sit-down
+          Dinner desperdiça mais que Buffet e Finger Food, em todas as
           faixas de pricing.
-        - Na exploracao descritiva, a diferenca de desperdicio associada a
-          condicao de armazenamento (`storage_conditions`) parece nao ser
+        - Na exploração descritiva, a diferença de desperdício associada à
+          condição de armazenamento (`storage_conditions`) parece não ser
           uniforme entre tipos de alimento (Baked Goods e Dairy Products
           com taxas mais altas em temperatura ambiente), mas o teste
-          formal por alimento nao confirma essa diferenca como
-          estatisticamente significativa (HE-02, ver tabela de hipoteses
-          acima) - tratar como hipotese em aberto para investigacao futura.
-        - A faixa de preco (`pricing`) e a variavel isolada com maior poder
-          de discriminacao encontrada na analise: eventos High tem taxa de
-          desperdicio bem acima de Low e Moderate.
-        - A quantidade produzida tem relacao positiva, porem fraca a
-          moderada, com a taxa de desperdicio (r = 0,25); nao deve ser
-          usada isoladamente para prever desperdicio.
+          formal por alimento não confirma essa diferença como
+          estatisticamente significativa (HE-02, ver tabela de hipóteses
+          acima) — tratar como hipótese em aberto para investigação futura.
+        - A faixa de preço (`pricing`) é a variável isolada com maior poder
+          de discriminação encontrada na análise: eventos High têm taxa de
+          desperdício bem acima de Low e Moderate.
+        - A quantidade produzida tem relação positiva, porém fraca a
+          moderada, com a taxa de desperdício (r = 0,25); não deve ser
+          usada isoladamente para prever desperdício.
         - Perfis operacionais que combinam pricing High com Sit-down Dinner
-          concentram os maiores riscos de desperdicio, especialmente em
-          eventos pequenos, e justificam atencao operacional direcionada
-          (pagina *Perfis de risco*).
-        - O porte do evento (`event_size`), isoladamente, nao explica bem o
-          desperdicio por convidado; diferencas de tipo de evento e pricing
+          concentram os maiores riscos de desperdício, especialmente em
+          eventos pequenos, e justificam atenção operacional direcionada
+          (página *Perfis de risco*).
+        - O porte do evento (`event_size`), isoladamente, não explica bem o
+          desperdício por convidado; diferenças de tipo de evento e pricing
           parecem pesar mais.
         """
     )
 
-    st.subheader("Limitacoes e cuidados de interpretacao")
+    st.subheader("Limitações e cuidados de interpretação")
     st.markdown(
         """
-        - O dataset e **observacional**: as associacoes descritas aqui nao
-          devem ser lidas como relacoes de causa e efeito.
+        - O dataset é **observacional**: as associações descritas aqui não
+          devem ser lidas como relações de causa e efeito.
         - Perfis operacionais com poucos eventos (ver coluna "baixa
-          confianca" na pagina *Perfis de risco*) tem medias mais instaveis
-          e sensiveis a valores extremos.
-        - Os indicadores mudam conforme os filtros aplicados; comparacoes
-          entre paginas so sao validas quando os mesmos filtros estao ativos.
-        - Este dashboard resume os achados; os testes estatisticos formais
-          (intervalos de confianca, p-valor, tamanho de efeito) estao
-          documentados em `analysis/analise_estatistica.py` e nos relatorios
+          confiança" na página *Perfis de risco*) têm médias mais instáveis
+          e sensíveis a valores extremos.
+        - Os indicadores mudam conforme os filtros aplicados; comparações
+          entre páginas só são válidas quando os mesmos filtros estão ativos.
+        - Este dashboard resume os achados; os testes estatísticos formais
+          (intervalos de confiança, p-valor, tamanho de efeito) estão
+          documentados em `analysis/analise_estatistica.py` e nos relatórios
           gerados por ele.
-        - Algumas categorias sao sub-representadas na base (ex.: metodo
-          Buffet e historico de compra "Occasional"), o que reduz a
-          estabilidade de rankings e medias que dependam delas.
-        - O dataset tem origem sintetica/educacional (Kaggle); os padroes
-          encontrados ilustram o metodo de analise, mas nao devem ser
-          generalizados diretamente para operacoes reais sem validacao
+        - Algumas categorias são sub-representadas na base (ex.: método
+          Buffet e histórico de compra "Occasional"), o que reduz a
+          estabilidade de rankings e médias que dependam delas.
+        - O dataset tem origem sintética/educacional (Kaggle); os padrões
+          encontrados ilustram o método de análise, mas não devem ser
+          generalizados diretamente para operações reais sem validação
           adicional.
         """
     )
@@ -458,21 +491,29 @@ def page_conclusoes() -> None:
 
 def main() -> None:
     st.set_page_config(
-        page_title="Desperdicio de Alimentos em Buffets",
+        page_title="Desperdício de Alimentos em Buffets",
         page_icon="🍽️",
         layout="wide",
     )
+    inject_custom_css()
+    render_hero_banner()
 
     try:
         df = load_data()
     except (FileNotFoundError, ValueError) as exc:
-        st.title("Desperdicio de alimentos em servicos de buffet")
+        st.title("Desperdício de alimentos em serviços de buffet")
         st.error(str(exc))
         st.stop()
         return
 
-    st.sidebar.title("Navegacao")
+    st.sidebar.title("Navegação")
     page = st.sidebar.radio("Ir para", PAGES, label_visibility="collapsed")
+
+    col_glossario, col_leitura = st.sidebar.columns(2)
+    if col_glossario.button("📖 Glossário", use_container_width=True):
+        glossario_modal()
+    if col_leitura.button("🔎 Como ler", use_container_width=True):
+        interpretacao_modal()
 
     selections = render_sidebar_filters(df)
     df_filtered = apply_filters(df, selections)
@@ -481,11 +522,11 @@ def main() -> None:
         page_contexto(df)
     elif page == "Indicadores gerais":
         page_indicadores(df_filtered)
-    elif page == "Analises por pergunta":
+    elif page == "Análises por pergunta":
         page_perguntas(df_filtered)
     elif page == "Perfis de risco":
         page_perfis(df_filtered)
-    elif page == "Conclusoes e limitacoes":
+    elif page == "Conclusões e limitações":
         page_conclusoes()
 
 

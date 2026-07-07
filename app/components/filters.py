@@ -8,20 +8,20 @@ import streamlit as st
 from services.data import FILTER_COLUMNS, filter_options
 
 FILTER_LABELS = {
-    "preparation_method": "Metodo de preparo",
-    "pricing": "Faixa de preco (pricing)",
+    "preparation_method": "Método de preparo",
+    "pricing": "Faixa de preço (pricing)",
     "event_type": "Tipo de evento",
     "type_of_food": "Tipo de alimento",
     "event_size": "Porte do evento",
-    "storage_conditions": "Condicao de armazenamento",
+    "storage_conditions": "Condição de armazenamento",
 }
 
 
 def render_sidebar_filters(df: pd.DataFrame) -> dict[str, list[str]]:
-    """Renderiza os multiselects de filtro e retorna a selecao atual.
+    """Renderiza os multiselects de filtro e retorna a seleção atual.
 
-    Todos os filtros comecam com todos os valores marcados, garantindo que
-    a aplicacao abra sem filtros vazios e sem gerar dataframe vazio.
+    Todos os filtros começam com todos os valores marcados, garantindo que
+    a aplicação abra sem filtros vazios e sem gerar dataframe vazio.
     """
     options = filter_options(df)
     st.sidebar.header("Filtros")
