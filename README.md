@@ -317,6 +317,17 @@ Detalhamento completo em `DIVISAO_RESPONSABILIDADES.md`.
 | Parte 3 | Dados, indicadores e rastreabilidade do pipeline | 25% |
 | Parte 4 | Reprodutibilidade, Docker e documentacao final | 25% |
 
+## Minha contribuição
+
+- Desenvolvimento do dashboard interativo em Streamlit: componentes, serviços e
+  utilitários da aplicação, além dos ajustes finais de interface.
+- Scripts de inicialização rápida para a apresentação.
+- Preparação da base gold para execução local, `requirements.txt` e atualização do
+  README com a estrutura do dashboard e da análise.
+
+> Este repositório é uma cópia, com histórico, do original do grupo no GitLab da
+> UNIPAMPA (privado). Os e-mails dos colaboradores foram anonimizados no histórico.
+
 ## Repositorio e submissao
 
 ```bash
