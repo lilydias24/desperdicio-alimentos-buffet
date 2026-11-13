@@ -5,6 +5,10 @@ Entrega final da disciplina de Introducao a Ciencia de Dados - Grupo 03.
 **Integrantes:** Arthur Provenzi Parizotto, Bianca Maia Ribeiro, Emilly
 Nascimento Dias e Rafael Jaques do Nascimento Lopes.
 
+![Dashboard: indicadores gerais de desperdício com filtros por método de preparo, preço, tipo de evento e alimento](docs/img/dashboard-indicadores.png)
+
+![Dashboard: distribuição da taxa de desperdício por tipo de alimento (Q1)](docs/img/dashboard-analises.png)
+
 ## Problema
 
 Servicos de buffet precisam estimar, com antecedencia, quanto alimento
